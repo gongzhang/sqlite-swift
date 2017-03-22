@@ -6,6 +6,20 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		F04153CF1E8275F10018D2BB /* SQLite iOS fat */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F04153D01E8275F10018D2BB /* Build configuration list for PBXAggregateTarget "SQLite iOS fat" */;
+			buildPhases = (
+				F04153D31E8276000018D2BB /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "SQLite iOS fat";
+			productName = "SQLite iOS fat";
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		03A65E641C6BB0F60062603F /* SQLite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03A65E5A1C6BB0F50062603F /* SQLite.framework */; };
 		03A65E711C6BB2CD0062603F /* usr/include/sqlite3.h in Headers */ = {isa = PBXBuildFile; fileRef = EE91808B1C46E34A0038162A /* usr/include/sqlite3.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -753,7 +767,9 @@
 					};
 					EE247AD21C3F04ED00AE3E12 = {
 						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = 984L9QX9X5;
 						LastSwiftMigration = 0800;
+						ProvisioningStyle = Automatic;
 					};
 					EE247ADC1C3F04ED00AE3E12 = {
 						CreatedOnToolsVersion = 7.2;
@@ -766,6 +782,11 @@
 					EE247B441C3F3ED000AE3E12 = {
 						CreatedOnToolsVersion = 7.2;
 						LastSwiftMigration = 0800;
+					};
+					F04153CF1E8275F10018D2BB = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = 984L9QX9X5;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -788,6 +809,7 @@
 				03A65E591C6BB0F50062603F /* SQLite tvOS */,
 				03A65E621C6BB0F60062603F /* SQLiteTests tvOS */,
 				A121AC441CA35C79005A31D1 /* SQLite watchOS */,
+				F04153CF1E8275F10018D2BB /* SQLite iOS fat */,
 			);
 		};
 /* End PBXProject section */
@@ -846,6 +868,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		F04153D31E8276000018D2BB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Merge Script\n\n# 1\n# Set bash script to exit immediately if any commands fail.\nset -e\n\n# 2\n# Setup some constants for use later on.\nFRAMEWORK_TARGET_NAME=\"SQLite iOS\"\nFRAMEWORK_SCHEME_NAME=\"SQLite iOS\"\nFRAMEWORK_NAME=\"SQLite\"\n\n# 3\n# If remnants from a previous build exist, delete them.\nxcodebuild -target \"${FRAMEWORK_TARGET_NAME}\" clean\nrm -rf \"${BUILD_DIR}/Debug-iphoneos/${FRAMEWORK_NAME}.framework\"\nrm -rf \"${BUILD_DIR}/Debug-iphoneos/${FRAMEWORK_NAME}.framework.dSYM\"\nrm -rf \"${BUILD_DIR}/Debug-iphonesimulator/${FRAMEWORK_NAME}.framework\"\nrm -rf \"${BUILD_DIR}/Debug-iphonesimulator/${FRAMEWORK_NAME}.framework.dSYM\"\nrm -rf \"${BUILD_DIR}/Release-iphoneos/${FRAMEWORK_NAME}.framework\"\nrm -rf \"${BUILD_DIR}/Release-iphoneos/${FRAMEWORK_NAME}.framework.dSYM\"\nrm -rf \"${BUILD_DIR}/Release-iphonesimulator/${FRAMEWORK_NAME}.framework\"\nrm -rf \"${BUILD_DIR}/Release-iphonesimulator/${FRAMEWORK_NAME}.framework.dSYM\"\n\n# 4\n# Build the framework for device and for simulator (using\n# all needed architectures).\n\nxcodebuild -target \"${FRAMEWORK_TARGET_NAME}\" -configuration Release -arch arm64 -arch armv7 -arch armv7s only_active_arch=no defines_module=yes -sdk \"iphoneos\" -scheme \"${FRAMEWORK_SCHEME_NAME}\" -derivedDataPath \"${BUILD_DIR}/../..\" OTHER_CFLAGS=\"-fembed-bitcode\" OTHER_LDFLAGS=\"-fembed-bitcode\" BITCODE_GENERATION_MODE=bitcode\n\nxcodebuild -target \"${FRAMEWORK_TARGET_NAME}\" -configuration Release -arch x86_64 -arch i386 only_active_arch=no defines_module=yes -sdk \"iphonesimulator\" -scheme \"${FRAMEWORK_SCHEME_NAME}\" -derivedDataPath \"${BUILD_DIR}/../..\"\n\n# 5\n# Remove .framework file if exists on Desktop from previous run.\nif [ -d \"${HOME}/Desktop/${FRAMEWORK_NAME}.framework\" ]; then\nrm -rf \"${HOME}/Desktop/${FRAMEWORK_NAME}.framework\"\nfi\n\n# 6\n# Copy the device version of framework to Desktop.\ncp -r \"${BUILD_DIR}/Release-iphoneos/${FRAMEWORK_NAME}.framework\" \"${HOME}/Desktop/${FRAMEWORK_NAME}.framework\"\n\n# 7\n# Replace the framework executable within the framework with\n# a new version created by merging the device and simulator\n# frameworks' executables with lipo.\nlipo -create -output \"${HOME}/Desktop/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${BUILD_DIR}/Release-iphoneos/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${BUILD_DIR}/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\"\n\n# 8\n# Copy the Swift module mappings for the simulator into the\n# framework.  The device mappings already exist from step 6.\ncp -r \"${BUILD_DIR}/Release-iphonesimulator/${FRAMEWORK_NAME}.framework/Modules/${FRAMEWORK_NAME}.swiftmodule/\" \"${HOME}/Desktop/${FRAMEWORK_NAME}.framework/Modules/${FRAMEWORK_NAME}.swiftmodule\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		03A65E551C6BB0F50062603F /* Sources */ = {
@@ -1280,8 +1318,9 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 984L9QX9X5;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1289,7 +1328,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.stephencelis.SQLite;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gongzh.SQLite;
 				PRODUCT_NAME = SQLite;
 				SKIP_INSTALL = YES;
 				"SWIFT_INCLUDE_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/CocoaPods/iphoneos";
@@ -1306,8 +1345,9 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 984L9QX9X5;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1315,7 +1355,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.stephencelis.SQLite;
+				PRODUCT_BUNDLE_IDENTIFIER = co.gongzh.SQLite;
 				PRODUCT_NAME = SQLite;
 				SKIP_INSTALL = YES;
 				"SWIFT_INCLUDE_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/CocoaPods/iphoneos";
@@ -1432,6 +1472,22 @@
 			};
 			name = Release;
 		};
+		F04153D11E8275F10018D2BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = 984L9QX9X5;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		F04153D21E8275F10018D2BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = 984L9QX9X5;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1506,6 +1562,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		F04153D01E8275F10018D2BB /* Build configuration list for PBXAggregateTarget "SQLite iOS fat" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F04153D11E8275F10018D2BB /* Debug */,
+				F04153D21E8275F10018D2BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
